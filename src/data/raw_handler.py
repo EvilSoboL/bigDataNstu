@@ -28,3 +28,21 @@ def get_five_summary_statistic():
     for key, value in raw_dict.items():
         print(key)
         display(value.describe())
+
+
+def show_raw_data():
+    raw_dict = get_raw_data_dict_csv()
+    for key, value in raw_dict.items():
+        display(key)
+        display(value.head())
+
+
+def delete_unused_columns_from_dict(raw_dict: dict[str: pd.DataFrame]) -> dict[str: pd.DataFrame]:
+    for key, values in raw_dict.items():
+        if 'F_air' in values.columns:
+            columns_to_drop = ['F_fuel', 'F_air']
+            values.drop(columns=columns_to_drop, inplace=True)
+        else:
+            columns_to_drop = ['F_fuel', 'F_steam']
+            values.drop(columns=columns_to_drop, inplace=True)
+    return raw_dict

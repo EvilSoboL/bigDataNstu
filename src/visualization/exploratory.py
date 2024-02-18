@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from src.data.raw_handler import get_raw_data_dict_csv
+from src.features.pca import get_pca_dict
 
 
 def show_boxplots():
@@ -42,4 +43,15 @@ def show_correlation_matrices():
         f, ax = plt.subplots(figsize=(9, 6))
         sns.heatmap(corr, annot=True, linewidths=1.5, fmt='.2f', ax=ax)
         ax.set_title(f'{key}')
+        plt.show()
+
+
+def show_pca_plots():
+    raw_dict = get_raw_data_dict_csv()
+    pca_dict = get_pca_dict(raw_dict)
+    for key, pca_df in pca_dict.items():
+        plt.scatter(pca_df.PC1, pca_df.PC2)
+
+        for sample in pca_df.index:
+            plt.annotate(sample, (pca_df.PC1.loc[sample], pca_df.PC2.loc[sample]))
         plt.show()
