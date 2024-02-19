@@ -49,9 +49,16 @@ def show_correlation_matrices():
 def show_pca_plots():
     raw_dict = get_raw_data_dict_csv()
     pca_dict = get_pca_dict(raw_dict)
-    for key, pca_df in pca_dict.items():
+    for key, pca_value in pca_dict.items():
+        pca_df = pca_value[0]
+        pca_per_var = pca_value[1]
         plt.scatter(pca_df.PC1, pca_df.PC2)
+
+        plt.title(f'{key}')
+        plt.xlabel(f'PC1 - {pca_per_var[0]}%')
+        plt.ylabel(f'PC2 - {pca_per_var[1]}%')
 
         for sample in pca_df.index:
             plt.annotate(sample, (pca_df.PC1.loc[sample], pca_df.PC2.loc[sample]))
+
         plt.show()

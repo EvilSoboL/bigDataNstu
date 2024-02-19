@@ -4,7 +4,7 @@ from sklearn.decomposition import PCA
 from sklearn import preprocessing
 
 
-def get_pca_dict(raw_dict:  dict[str: pd.DataFrame]) -> dict[str: pd.DataFrame]:
+def get_pca_dict(raw_dict:  dict[str: pd.DataFrame]) -> dict[str: pd.DataFrame, list]:
     pca_dict = dict()
     for key, value in raw_dict.items():
         scaled_data = preprocessing.scale(value.T)
@@ -15,5 +15,5 @@ def get_pca_dict(raw_dict:  dict[str: pd.DataFrame]) -> dict[str: pd.DataFrame]:
         per_var = np.round(pca.explained_variance_ratio_*100, decimals=1)
         labels = ['PC' + str(x) for x in range(1, len(per_var) + 1)]
         pca_df = pd.DataFrame(pca_data, index=value.columns, columns=labels)
-        pca_dict[key] = pca_df
+        pca_dict[key] = pca_df, per_var
     return pca_dict
