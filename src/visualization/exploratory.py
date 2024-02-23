@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
-from src.data.raw_handler import get_raw_data_dict_csv
+from src.data.raw_handler import get_raw_data_dict_csv, get_five_summary_statistic
 from src.features.pca import get_pca_dict
 
 
-def show_boxplots():
+def show_boxplots() -> None:
     components = ['O2', 'CO', 'NO', 'NO2', 'NOx', 'CO2', 'SO2']
     for component_to_show in components:
         raw_dict = get_raw_data_dict_csv()
@@ -26,7 +27,7 @@ def show_boxplots():
             plt.show()
 
 
-def show_pair_grids():
+def show_pair_grids() -> None:
     raw_dict = get_raw_data_dict_csv()
     for key in raw_dict:
         pair_grid_plot = sns.PairGrid(raw_dict[key])
@@ -35,7 +36,7 @@ def show_pair_grids():
         plt.show()
 
 
-def show_correlation_matrices():
+def show_correlation_matrices() -> None:
     raw_dict = get_raw_data_dict_csv()
     for key in raw_dict:
         corr = raw_dict[key].corr()
@@ -46,7 +47,7 @@ def show_correlation_matrices():
         plt.show()
 
 
-def show_pca_plots():
+def show_pca_plots() -> None:
     raw_dict = get_raw_data_dict_csv()
     pca_dict = get_pca_dict(raw_dict)
     for key, pca_value in pca_dict.items():
@@ -61,4 +62,32 @@ def show_pca_plots():
         for sample in pca_df.index:
             plt.annotate(sample, (pca_df.PC1.loc[sample], pca_df.PC2.loc[sample]))
 
+        plt.show()
+
+
+def _delete_consumption_columns(user_dict: dict[str: pd.DataFrame]) -> dict[str: pd.DataFrame]:
+    """
+    Удаляет колонки F_fuel, F_air, F_steam и строчку count
+    """
+    for key in user_dict.keys():
+        if '_steam' in key:
+            user_dict[key].drop(columns=['F_fuel', 'F_steam'], index=['count'], inplace=True)
+        else:
+            user_dict[key].drop(columns=['F_fuel', 'F_air'], index=['count'], inplace=True)
+    return user_dict
+
+
+def show_five_summary_heatmap() -> None:
+    five_summary: dict = _delete_consumption_columns(get_five_summary_statistic(show=False))
+    diesel_heatmap: pd.DataFrame = five_summary['diesel_air'] - five_summary['diesel_steam']
+    heavy_oil_heatmap: pd.DataFrame = five_summary['heavy_oil_air'] - five_summary['heavy_oil_steam']
+    kerosene_heatmap: pd.DataFrame = five_summary['kerosene_air'] - five_summary['kerosene_steam']
+
+    heatmaps: dict = {
+        'diesel_heatmap': diesel_heatmap, 'heavy_oil_heatmap': heavy_oil_heatmap, 'kerosene_heatmap': kerosene_heatmap
+    }
+    for key in heatmaps.keys():
+        f, ax = plt.subplots(figsize=(9, 6))
+        sns.heatmap(heatmaps[key], annot=True, linewidths=1.5, fmt='.2f', ax=ax)
+        ax.set_title(f'{key} (air - steam)')
         plt.show()

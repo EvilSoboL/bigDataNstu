@@ -23,11 +23,19 @@ def get_data_info_from_dict():
         value.info()
 
 
-def get_five_summary_statistic():
-    raw_dict = get_raw_data_dict_csv()
+def get_five_summary_statistic(show: bool) -> dict[str: pd.DataFrame] | None:
+    raw_dict: dict = get_raw_data_dict_csv()
+    five_summary_dict: dict = dict()
     for key, value in raw_dict.items():
-        print(key)
-        display(value.describe())
+        if show:
+            display(key)
+            display(value.describe())
+        else:
+            five_summary_dict[key] = value.describe()
+    if show:
+        return None
+    else:
+        return five_summary_dict
 
 
 def show_raw_data():
