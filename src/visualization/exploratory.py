@@ -50,18 +50,28 @@ def show_correlation_matrices() -> None:
 def show_pca_plots() -> None:
     raw_dict = get_raw_data_dict_csv()
     pca_dict = get_pca_dict(raw_dict)
-    for key, pca_value in pca_dict.items():
-        pca_df = pca_value[0]
-        pca_per_var = pca_value[1]
-        plt.scatter(pca_df.PC1, pca_df.PC2)
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
 
-        plt.title(f'{key}')
+    for key, pca_value in pca_dict.items():
+        pca_df, pca_per_var = pca_value
+        plt.figure(figsize=(10, 8))
+
+        # Создаем scatter plot для каждой точки с уникальным цветом
+        for i, sample in enumerate(pca_df.index):
+            plt.scatter(pca_df.PC1.loc[sample], pca_df.PC2.loc[sample], color=colors[i % len(colors)], label=sample if i < len(colors) else "")
+            plt.annotate(sample, (pca_df.PC1.loc[sample], pca_df.PC2.loc[sample]))
+
+        plt.title(f'PCA Plot for {key}')
         plt.xlabel(f'PC1 - {pca_per_var[0]}%')
         plt.ylabel(f'PC2 - {pca_per_var[1]}%')
 
-        for sample in pca_df.index:
-            plt.annotate(sample, (pca_df.PC1.loc[sample], pca_df.PC2.loc[sample]))
+        # Создаем легенду
+        # Чтобы избежать дублирования в легенде, создаем пользовательские легенды
+        handles, labels = plt.gca().get_legend_handles_labels()
+        by_label = dict(zip(labels, handles))  # Удаляем дубликаты
+        plt.legend(by_label.values(), by_label.keys())
 
+        plt.grid(True)
         plt.show()
 
 
